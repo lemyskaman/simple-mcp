@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "simple-directory-server": {
+      "command": "node",
+      "args": ["dist/main.js"],
+      "cwd": "C:/Users/lemys.lopez/projects/fusable/simple-mcp",
+      "env": {}
+    }
+  }
+}

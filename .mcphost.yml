@@ -1,0 +1,33 @@
+# MCPHost configuration for Simple Directory MCP Server
+# Configuration for mcphost to use with Llama 3.2:1b model
+
+# Model Configuration
+model: "ollama:llama3.2:1b"
+
+# MCP Servers Configuration
+mcpServers:
+  simple-directory-server:
+    type: "local"
+    command: ["node", "dist/main.js"]
+    environment:
+      NODE_ENV: "production"
+      DEBUG: "${env://DEBUG:-false}"
+
+# Application settings
+max-steps: 0  # Unlimited steps
+debug: false
+stream: true
+
+# Model generation parameters optimized for Llama 3.2:1b
+max-tokens: 2048
+temperature: 0.7
+top-p: 0.95
+top-k: 40
+
+# System prompt for better directory operations
+system-prompt: |
+  You are a helpful assistant with access to directory listing tools. 
+  When asked about files or directories, use the list_directory tool to provide accurate information.
+  Always use forward slashes (/) in paths, even on Windows systems.
+  current directory path is c:/Users/lemys.lopez/
+  Be concise and helpful in your responses.
