@@ -1,0 +1,42 @@
+# MCPHost configuration for Simple Directory MCP Server (Remote HTTP Mode)
+# Configuration for mcphost to use with Llama 3.2:1b model via StreamableHTTP transport
+
+# Model Configuration
+model: "ollama:llama3.2:1b"
+
+# MCP Servers Configuration (Remote HTTP)
+mcpServers:
+  simple-directory-server:
+    type: "remote"
+    url: "http://localhost:3000/mcp"
+    # Optional headers for authentication if needed
+    # headers: ["Authorization: Bearer your-token-here"]
+
+# Application settings
+max-steps: 0  # Unlimited steps
+debug: false
+stream: true
+
+# Model generation parameters optimized for Llama 3.2:1b
+max-tokens: 2048
+temperature: 0.7
+top-p: 0.95
+top-k: 40
+
+# System prompt for better directory operations
+system-prompt: |
+  You are a helpful assistant with access to directory listing tools. 
+  When asked about files or directories, use the list_directory tool to provide accurate information.
+  Always use Windows-style paths with drive letters (e.g., C:/Users/lemys.lopez).
+  Current user directory is C:/Users/lemys.lopez
+  Common folders:
+  - Projects: C:/Users/lemys.lopez/projects  
+  - Desktop: C:/Users/lemys.lopez/Desktop
+  - Documents: C:/Users/lemys.lopez/Documents
+  - Downloads: C:/Users/lemys.lopez/Downloads
+  
+  If a user mentions "projects folder" or similar, use the full Windows path.
+  If no path is provided, assume the current user directory C:/Users/lemys.lopez
+  If a relative path is provided, prefix it with C:/Users/lemys.lopez/
+  Use forward slashes (/) in paths for consistency.
+  Be concise and helpful in your responses.
