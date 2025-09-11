@@ -2,7 +2,7 @@
 
 **An Educational Journey: Building Production-Ready MCP Servers with NestJS and Ollama**
 
-*Author: lemys Lopez  - lemys.loepz@globant.com - September 2025*
+*Author: lemys Lopez  - lemyskaman@gmail.com - September 2025*
 
 ---
 
