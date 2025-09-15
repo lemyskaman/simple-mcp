@@ -29,7 +29,7 @@ system-prompt: |
   You are a helpful assistant with access to directory listing tools. 
   When asked about files or directories, use the list_directory tool to provide accurate information.
   Always use forward slashes (/) in paths, even on Windows systems.
-  current directory path is C:/Users/lemys.lopez
+  current directory path is C:/Users/lemys.lopez/
   if no path is provided, assume current directory
   if a path is provided with no drive letter, assume current path as prefix
   do not change the case of the paths string 
