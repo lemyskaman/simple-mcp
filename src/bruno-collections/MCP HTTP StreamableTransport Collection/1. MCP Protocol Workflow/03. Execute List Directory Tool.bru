@@ -1,0 +1,79 @@
+meta {
+  name: 03. Execute List Directory Tool
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_endpoint}}/mcp
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+  Mcp-Session-Id: {{session_id}}
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": {{request_id}},
+    "method": "tools/call",
+    "params": {
+      "name": "list_directory",
+      "arguments": {
+        "path": "{{test_path}}"
+      }
+    }
+  }
+}
+
+script:pre-request {
+  console.log('🛠️ Executing list_directory tool...');
+  console.log('📁 Target path: ' + bru.getVar('test_path'));
+  console.log('🆔 Using session ID: ' + bru.getVar('session_id'));
+  console.log('📝 Request ID: ' + bru.getVar('request_id'));
+}
+
+script:post-response {
+  // Validate JSON-RPC response
+  test('Response is valid JSON-RPC', function () {
+      const jsonData = res.getBody();
+      expect(jsonData).to.have.property('jsonrpc', '2.0');
+      expect(jsonData).to.have.property('id');
+      expect(jsonData).to.have.property('result');
+  });
+  
+  // Validate tool execution result
+  test('Tool execution returns content', function () {
+      const jsonData = res.getBody();
+      expect(jsonData.result).to.have.property('content');
+      expect(jsonData.result.content).to.be.an('array');
+      expect(jsonData.result.content).to.have.lengthOf.above(0);
+  });
+  
+  // Validate content structure
+  test('Content has proper structure', function () {
+      const jsonData = res.getBody();
+      const content = jsonData.result.content[0];
+      expect(content).to.have.property('type', 'text');
+      expect(content).to.have.property('text');
+      expect(content.text).to.be.a('string');
+      expect(content.text).to.have.lengthOf.above(0);
+      console.log('📂 Directory listing preview:', content.text.substring(0, 200) + '...');
+  });
+  
+  // Increment request ID for next request
+  const currentId = parseInt(bru.getVar('request_id'));
+  bru.setVar('request_id', (currentId + 1).toString());
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Execute the list_directory tool with the specified path parameter
+}

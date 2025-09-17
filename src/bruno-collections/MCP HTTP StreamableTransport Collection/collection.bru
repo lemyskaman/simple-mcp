@@ -1,0 +1,37 @@
+meta {
+  name: MCP HTTP StreamableTransport Collection
+}
+
+auth {
+  mode: none
+}
+
+vars:pre-request {
+  session_id: 
+  request_id: 1
+  test_path: C:/Users
+  base_endpoint: {{protocol}}://{{base_url}}:{{port}}
+}
+
+script:pre-request {
+  // Global pre-request script for logging
+  console.log('🚀 Executing request: ' + req.getName());
+  console.log('📍 Request URL: ' + req.getUrl());
+  console.log('⏰ Timestamp: ' + new Date().toISOString());
+}
+
+script:post-response {
+  // Global test script for basic validation
+  console.log('✅ Response received for: ' + req.getName());
+  console.log('📊 Status: ' + res.statusText + ' ' + res.getStatus());
+  console.log('⏱️ Response time: ' + res.getResponseTime() + 'ms');
+  
+  // Basic status code validation
+  test('Response status code is successful', function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201, 204]);
+  });
+}
+
+docs {
+  Complete test collection for the MCP HTTP StreamableTransport server. This collection demonstrates the full workflow of MCP protocol communication including session initialization, tool discovery, tool execution, and session cleanup. It also includes direct testing of the directory service endpoints.
+}

@@ -1,0 +1,41 @@
+meta {
+  name: 05. Delete MCP Session
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{base_endpoint}}/mcp
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json, text/event-stream
+  Mcp-Session-Id: {{session_id}}
+}
+
+script:pre-request {
+  console.log('🗑️ Cleaning up MCP session...');
+  console.log('🆔 Session to delete: ' + bru.getVar('session_id'));
+}
+
+script:post-response {
+  // Validate session cleanup
+  test('Session cleanup successful', function () {
+      expect(res.getStatus()).to.be.oneOf([200, 204]);
+      console.log('✅ Session successfully deleted');
+  });
+  
+  // Clear session ID
+  bru.setVar('session_id', '');
+  console.log('🧹 Session ID cleared from collection variables');
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Clean up the MCP session to free server resources
+}

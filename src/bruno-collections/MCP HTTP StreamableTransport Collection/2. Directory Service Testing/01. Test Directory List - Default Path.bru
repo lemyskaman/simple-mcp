@@ -1,0 +1,30 @@
+meta {
+  name: 01. Test Directory List - Default Path
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_endpoint}}/directory/list
+  body: none
+  auth: inherit
+}
+
+script:post-response {
+  // Validate response structure
+  test('Directory service returns string response', function () {
+      expect(JSON.stringify(res.getBody())).to.be.a('string');
+      expect(JSON.stringify(res.getBody())).to.have.lengthOf.above(0);
+  });
+  
+  // Log response preview
+  console.log('📂 Directory listing preview:', JSON.stringify(res.getBody()).substring(0, 200) + '...');
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Test directory listing with default path (current directory)
+}

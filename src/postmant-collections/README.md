@@ -120,6 +120,32 @@ The collection uses several variables for reusability:
 - **`test_path`**: "C:/Users" (default test directory path)
 - **`base_endpoint`**: "{{protocol}}://{{base_url}}:{{port}}" (constructed URL)
 
+## ⚠️ **Important Headers Required**
+
+The MCP StreamableHTTP transport requires specific headers for all requests:
+
+### Required Headers
+- **`Content-Type`**: `application/json` (for POST requests with body)
+- **`Accept`**: `application/json, text/event-stream` (**CRITICAL** - without this header you'll get error -32000)
+- **`Mcp-Session-Id`**: Session identifier (after initialization)
+
+### Why Accept Header is Required
+The StreamableHTTP transport supports both:
+- **`application/json`**: For standard JSON-RPC responses
+- **`text/event-stream`**: For streaming capabilities
+
+If the client doesn't declare support for both content types, the server returns:
+```json
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32000,
+    "message": "Not Acceptable: Client must accept both application/json and text/event-stream"
+  },
+  "id": null
+}
+```
+
 ## 🧪 Testing Features
 
 ### Automated Test Scripts
@@ -227,22 +253,27 @@ Each request includes comprehensive test scripts:
 
 ### Common Issues
 
-1. **Connection Refused**
+1. **Error -32000: "Not Acceptable: Client must accept both application/json and text/event-stream"**
+   - **Cause**: Missing or incorrect `Accept` header
+   - **Solution**: Ensure all MCP requests include `Accept: application/json, text/event-stream`
+   - **Note**: This is automatically included in the updated collection
+
+2. **Connection Refused**
    - Ensure MCP server is running on port 3000
    - Check firewall settings
    - Verify `npm run start:http` was successful
 
-2. **Session ID Not Captured**
+3. **Session ID Not Captured**
    - Check if server returns `Mcp-Session-Id` header
    - Verify pre-request scripts are enabled
    - Look for JavaScript errors in Postman console
 
-3. **Tool Not Found**
+4. **Tool Not Found**
    - Ensure server has `list_directory` tool registered
    - Check server logs for errors
    - Verify MCP service is properly configured
 
-4. **Path Access Denied**
+5. **Path Access Denied**
    - Try different test paths
    - Ensure directory exists and is readable
    - Check Windows permissions

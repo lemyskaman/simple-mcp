@@ -125,6 +125,11 @@
                 "key": "Content-Type",
                 "value": "application/json",
                 "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
               }
             ],
             "body": {
@@ -207,6 +212,11 @@
               {
                 "key": "Content-Type",
                 "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
                 "type": "text"
               },
               {
@@ -299,6 +309,11 @@
                 "type": "text"
               },
               {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
                 "key": "Mcp-Session-Id",
                 "value": "{{session_id}}",
                 "type": "text"
@@ -369,6 +384,11 @@
                 "type": "text"
               },
               {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
                 "key": "Mcp-Session-Id",
                 "value": "{{session_id}}",
                 "type": "text"
@@ -429,6 +449,11 @@
           "request": {
             "method": "DELETE",
             "header": [
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
               {
                 "key": "Mcp-Session-Id",
                 "value": "{{session_id}}",
@@ -597,7 +622,13 @@
           ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{base_endpoint}}/mcp",
               "host": [
