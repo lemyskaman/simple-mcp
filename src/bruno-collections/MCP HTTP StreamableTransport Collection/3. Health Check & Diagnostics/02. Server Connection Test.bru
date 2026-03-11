@@ -1,0 +1,29 @@
+meta {
+  name: 02. Server Connection Test
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_endpoint}}/
+  body: none
+  auth: inherit
+}
+
+script:post-response {
+  // Validate server is running
+  test('Server is accessible', function () {
+      expect(res.getStatus()).to.be.below(500);
+  });
+  
+  // Log server response time
+  console.log('⚡ Server response time: ' + res.getResponseTime() + 'ms');
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Test basic server connectivity and response time
+}

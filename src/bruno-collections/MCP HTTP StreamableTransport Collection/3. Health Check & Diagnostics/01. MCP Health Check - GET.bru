@@ -1,0 +1,32 @@
+meta {
+  name: 01. MCP Health Check - GET
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_endpoint}}/mcp
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json, text/event-stream
+}
+
+script:post-response {
+  // Basic health check validation
+  test('MCP endpoint is accessible via GET', function () {
+      expect(res.getStatus()).to.be.oneOf([200, 405]);
+  });
+  
+  console.log('🏥 MCP endpoint health status: ' + res.statusText);
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Basic health check for MCP endpoint availability
+}

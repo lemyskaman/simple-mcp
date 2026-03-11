@@ -1,0 +1,33 @@
+meta {
+  name: 03. Test Directory List - Root Drive
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_endpoint}}/directory/list?path=C:/
+  body: none
+  auth: inherit
+}
+
+params:query {
+  path: C:/
+}
+
+script:post-response {
+  // Validate root drive listing
+  test('Root drive listing works', function () {
+      expect(JSON.stringify(res.getBody())).to.be.a('string');
+      expect(JSON.stringify(res.getBody())).to.have.lengthOf.above(0);
+  });
+  
+  console.log('💿 Root drive listing preview:', JSON.stringify(res.getBody()).substring(0, 200) + '...');
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Test directory listing with root drive path
+}

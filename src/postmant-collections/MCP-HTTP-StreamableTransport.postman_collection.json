@@ -1,0 +1,681 @@
+{
+  "info": {
+    "name": "MCP HTTP StreamableTransport Collection",
+    "description": "Complete test collection for the MCP HTTP StreamableTransport server. This collection demonstrates the full workflow of MCP protocol communication including session initialization, tool discovery, tool execution, and session cleanup. It also includes direct testing of the directory service endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "mcp-http-streamable-collection",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "variable": [
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string",
+      "description": "MCP session ID captured from initialization response"
+    },
+    {
+      "key": "request_id",
+      "value": "1",
+      "type": "string",
+      "description": "JSON-RPC request ID counter (auto-incremented)"
+    },
+    {
+      "key": "test_path",
+      "value": "C:/Users",
+      "type": "string",
+      "description": "Default path for testing directory listing tool"
+    },
+    {
+      "key": "base_endpoint",
+      "value": "{{protocol}}://{{base_url}}:{{port}}",
+      "type": "string",
+      "description": "Constructed base endpoint URL from environment variables"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global pre-request script for logging",
+          "console.log('🚀 Executing request: ' + pm.info.requestName);",
+          "console.log('📍 Request URL: ' + pm.request.url);",
+          "console.log('⏰ Timestamp: ' + new Date().toISOString());"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script for basic validation",
+          "console.log('✅ Response received for: ' + pm.info.requestName);",
+          "console.log('📊 Status: ' + pm.response.status + ' ' + pm.response.code);",
+          "console.log('⏱️ Response time: ' + pm.response.responseTime + 'ms');",
+          "",
+          "// Basic status code validation",
+          "pm.test('Response status code is successful', function () {",
+          "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "1. MCP Protocol Workflow",
+      "description": "Complete MCP protocol workflow demonstrating session initialization, tool discovery, tool execution, and cleanup",
+      "item": [
+        {
+          "name": "01. Initialize MCP Session",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Set initial request ID",
+                  "pm.collectionVariables.set('request_id', '1');",
+                  "console.log('🔄 Initializing MCP session...');",
+                  "console.log('📝 Request ID: ' + pm.collectionVariables.get('request_id'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate response structure",
+                  "pm.test('Response has JSON-RPC structure', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('jsonrpc');",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "});",
+                  "",
+                  "// Capture session ID from response headers",
+                  "pm.test('Session ID is provided in response', function () {",
+                  "    const sessionId = pm.response.headers.get('Mcp-Session-Id');",
+                  "    pm.expect(sessionId).to.not.be.null;",
+                  "    pm.expect(sessionId).to.not.be.undefined;",
+                  "    pm.expect(sessionId).to.have.lengthOf.above(0);",
+                  "    ",
+                  "    // Save session ID for subsequent requests",
+                  "    pm.collectionVariables.set('session_id', sessionId);",
+                  "    console.log('💾 Session ID captured: ' + sessionId);",
+                  "});",
+                  "",
+                  "// Increment request ID for next request",
+                  "const currentId = parseInt(pm.collectionVariables.get('request_id'));",
+                  "pm.collectionVariables.set('request_id', (currentId + 1).toString());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": {{request_id}},\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2024-11-05\",\n    \"capabilities\": {\n      \"tools\": {}\n    },\n    \"clientInfo\": {\n      \"name\": \"postman-test-client\",\n      \"version\": \"1.0.0\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_endpoint}}/mcp",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                "mcp"
+              ]
+            },
+            "description": "Initialize a new MCP session and capture the session ID for subsequent requests"
+          }
+        },
+        {
+          "name": "02. List Available Tools",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('🔍 Discovering available tools...');",
+                  "console.log('🆔 Using session ID: ' + pm.collectionVariables.get('session_id'));",
+                  "console.log('📝 Request ID: ' + pm.collectionVariables.get('request_id'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate JSON-RPC response",
+                  "pm.test('Response is valid JSON-RPC', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('jsonrpc', '2.0');",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('result');",
+                  "});",
+                  "",
+                  "// Validate tools list structure",
+                  "pm.test('Tools list is returned', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.result).to.have.property('tools');",
+                  "    pm.expect(jsonData.result.tools).to.be.an('array');",
+                  "    pm.expect(jsonData.result.tools).to.have.lengthOf.above(0);",
+                  "});",
+                  "",
+                  "// Validate list_directory tool is available",
+                  "pm.test('list_directory tool is available', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const tools = jsonData.result.tools;",
+                  "    const listDirTool = tools.find(tool => tool.name === 'list_directory');",
+                  "    pm.expect(listDirTool).to.not.be.undefined;",
+                  "    pm.expect(listDirTool).to.have.property('description');",
+                  "    pm.expect(listDirTool).to.have.property('inputSchema');",
+                  "    console.log('✅ Found list_directory tool:', JSON.stringify(listDirTool, null, 2));",
+                  "});",
+                  "",
+                  "// Increment request ID for next request",
+                  "const currentId = parseInt(pm.collectionVariables.get('request_id'));",
+                  "pm.collectionVariables.set('request_id', (currentId + 1).toString());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{session_id}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": {{request_id}},\n  \"method\": \"tools/list\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_endpoint}}/mcp",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                "mcp"
+              ]
+            },
+            "description": "Discover all available tools provided by the MCP server"
+          }
+        },
+        {
+          "name": "03. Execute List Directory Tool",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('🛠️ Executing list_directory tool...');",
+                  "console.log('📁 Target path: ' + pm.collectionVariables.get('test_path'));",
+                  "console.log('🆔 Using session ID: ' + pm.collectionVariables.get('session_id'));",
+                  "console.log('📝 Request ID: ' + pm.collectionVariables.get('request_id'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate JSON-RPC response",
+                  "pm.test('Response is valid JSON-RPC', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('jsonrpc', '2.0');",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('result');",
+                  "});",
+                  "",
+                  "// Validate tool execution result",
+                  "pm.test('Tool execution returns content', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.result).to.have.property('content');",
+                  "    pm.expect(jsonData.result.content).to.be.an('array');",
+                  "    pm.expect(jsonData.result.content).to.have.lengthOf.above(0);",
+                  "});",
+                  "",
+                  "// Validate content structure",
+                  "pm.test('Content has proper structure', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    const content = jsonData.result.content[0];",
+                  "    pm.expect(content).to.have.property('type', 'text');",
+                  "    pm.expect(content).to.have.property('text');",
+                  "    pm.expect(content.text).to.be.a('string');",
+                  "    pm.expect(content.text).to.have.lengthOf.above(0);",
+                  "    console.log('📂 Directory listing preview:', content.text.substring(0, 200) + '...');",
+                  "});",
+                  "",
+                  "// Increment request ID for next request",
+                  "const currentId = parseInt(pm.collectionVariables.get('request_id'));",
+                  "pm.collectionVariables.set('request_id', (currentId + 1).toString());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{session_id}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": {{request_id}},\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"list_directory\",\n    \"arguments\": {\n      \"path\": \"{{test_path}}\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_endpoint}}/mcp",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                "mcp"
+              ]
+            },
+            "description": "Execute the list_directory tool with the specified path parameter"
+          }
+        },
+        {
+          "name": "04. Execute Tool with Root Path",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('🛠️ Executing list_directory tool with root path...');",
+                  "console.log('📁 Target path: C:/');",
+                  "console.log('🆔 Using session ID: ' + pm.collectionVariables.get('session_id'));",
+                  "console.log('📝 Request ID: ' + pm.collectionVariables.get('request_id'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate successful execution",
+                  "pm.test('Tool executes successfully with root path', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('jsonrpc', '2.0');",
+                  "    pm.expect(jsonData.result).to.have.property('content');",
+                  "    console.log('✅ Root directory listing successful');",
+                  "});",
+                  "",
+                  "// Increment request ID for next request",
+                  "const currentId = parseInt(pm.collectionVariables.get('request_id'));",
+                  "pm.collectionVariables.set('request_id', (currentId + 1).toString());"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{session_id}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": {{request_id}},\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"list_directory\",\n    \"arguments\": {\n      \"path\": \"C:/\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_endpoint}}/mcp",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                "mcp"
+              ]
+            },
+            "description": "Test the tool with a different path (root directory)"
+          }
+        },
+        {
+          "name": "05. Delete MCP Session",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('🗑️ Cleaning up MCP session...');",
+                  "console.log('🆔 Session to delete: ' + pm.collectionVariables.get('session_id'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate session cleanup",
+                  "pm.test('Session cleanup successful', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "    console.log('✅ Session successfully deleted');",
+                  "});",
+                  "",
+                  "// Clear session ID",
+                  "pm.collectionVariables.set('session_id', '');",
+                  "console.log('🧹 Session ID cleared from collection variables');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Mcp-Session-Id",
+                "value": "{{session_id}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_endpoint}}/mcp",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                "mcp"
+              ]
+            },
+            "description": "Clean up the MCP session to free server resources"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Directory Service Testing",
+      "description": "Direct testing of the directory service endpoints outside of MCP protocol",
+      "item": [
+        {
+          "name": "01. Test Directory List - Default Path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate response structure",
+                  "pm.test('Directory service returns string response', function () {",
+                  "    pm.expect(pm.response.text()).to.be.a('string');",
+                  "    pm.expect(pm.response.text()).to.have.lengthOf.above(0);",
+                  "});",
+                  "",
+                  "// Log response preview",
+                  "console.log('📂 Directory listing preview:', pm.response.text().substring(0, 200) + '...');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_endpoint}}/directory/list",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                "directory",
+                "list"
+              ]
+            },
+            "description": "Test directory listing with default path (current directory)"
+          }
+        },
+        {
+          "name": "02. Test Directory List - Custom Path",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate custom path response",
+                  "pm.test('Custom path directory listing works', function () {",
+                  "    pm.expect(pm.response.text()).to.be.a('string');",
+                  "    pm.expect(pm.response.text()).to.have.lengthOf.above(0);",
+                  "});",
+                  "",
+                  "console.log('📁 Custom path listing preview:', pm.response.text().substring(0, 200) + '...');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_endpoint}}/directory/list?path={{test_path}}",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                "directory",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "path",
+                  "value": "{{test_path}}"
+                }
+              ]
+            },
+            "description": "Test directory listing with custom path parameter"
+          }
+        },
+        {
+          "name": "03. Test Directory List - Root Drive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate root drive listing",
+                  "pm.test('Root drive listing works', function () {",
+                  "    pm.expect(pm.response.text()).to.be.a('string');",
+                  "    pm.expect(pm.response.text()).to.have.lengthOf.above(0);",
+                  "});",
+                  "",
+                  "console.log('💿 Root drive listing preview:', pm.response.text().substring(0, 200) + '...');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_endpoint}}/directory/list?path=C:/",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                "directory",
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "path",
+                  "value": "C:/"
+                }
+              ]
+            },
+            "description": "Test directory listing with root drive path"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Health Check & Diagnostics",
+      "description": "Health check and diagnostic requests for monitoring server status",
+      "item": [
+        {
+          "name": "01. MCP Health Check - GET",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Basic health check validation",
+                  "pm.test('MCP endpoint is accessible via GET', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 405]);",
+                  "});",
+                  "",
+                  "console.log('🏥 MCP endpoint health status: ' + pm.response.status);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json, text/event-stream",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_endpoint}}/mcp",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                "mcp"
+              ]
+            },
+            "description": "Basic health check for MCP endpoint availability"
+          }
+        },
+        {
+          "name": "02. Server Connection Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Validate server is running",
+                  "pm.test('Server is accessible', function () {",
+                  "    pm.expect(pm.response.code).to.be.below(500);",
+                  "});",
+                  "",
+                  "// Log server response time",
+                  "console.log('⚡ Server response time: ' + pm.response.responseTime + 'ms');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_endpoint}}/",
+              "host": [
+                "{{base_endpoint}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Test basic server connectivity and response time"
+          }
+        }
+      ]
+    }
+  ]
+}

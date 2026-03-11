@@ -1,0 +1,76 @@
+meta {
+  name: 01. Initialize MCP Session
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_endpoint}}/mcp
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": {{request_id}},
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2024-11-05",
+      "capabilities": {
+        "tools": {}
+      },
+      "clientInfo": {
+        "name": "postman-test-client",
+        "version": "1.0.0"
+      }
+    }
+  }
+}
+
+script:pre-request {
+  // Set initial request ID
+  bru.setVar('request_id', '1');
+  console.log('🔄 Initializing MCP session...');
+  console.log('📝 Request ID: ' + bru.getVar('request_id'));
+}
+
+script:post-response {
+  // Validate response structure
+  test('Response has JSON-RPC structure', function () {
+      const jsonData = res.getBody();
+      expect(jsonData).to.have.property('jsonrpc');
+      expect(jsonData).to.have.property('id');
+  });
+  
+  // Capture session ID from response headers
+  test('Session ID is provided in response', function () {
+      const sessionId = res.getHeader('mcp-session-id');
+      expect(sessionId).to.not.be.null;
+      expect(sessionId).to.not.be.undefined;
+      expect(sessionId).to.have.lengthOf.above(0);
+      
+      // Save session ID for subsequent requests
+      bru.setVar('session_id', sessionId);
+      console.log('💾 Session ID captured: ' + sessionId);
+  });
+  
+  // Increment request ID for next request
+  const currentId = parseInt(bru.getVar('request_id'));
+  bru.setVar('request_id', (currentId + 1).toString());
+  console.log('session changed')
+  console.log(bru.getVar('request_id'))
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Initialize a new MCP session and capture the session ID for subsequent requests
+}

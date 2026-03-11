@@ -1,0 +1,60 @@
+meta {
+  name: 04. Execute Tool with Root Path
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_endpoint}}/mcp
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+  Mcp-Session-Id: {{session_id}}
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": {{request_id}},
+    "method": "tools/call",
+    "params": {
+      "name": "list_directory",
+      "arguments": {
+        "path": "C:/"
+      }
+    }
+  }
+}
+
+script:pre-request {
+  console.log('🛠️ Executing list_directory tool with root path...');
+  console.log('📁 Target path: C:/');
+  console.log('🆔 Using session ID: ' + bru.getVar('session_id'));
+  console.log('📝 Request ID: ' + bru.getVar('request_id'));
+}
+
+script:post-response {
+  // Validate successful execution
+  test('Tool executes successfully with root path', function () {
+      const jsonData = res.getBody();
+      expect(jsonData).to.have.property('jsonrpc', '2.0');
+      expect(jsonData.result).to.have.property('content');
+      console.log('✅ Root directory listing successful');
+  });
+  
+  // Increment request ID for next request
+  const currentId = parseInt(bru.getVar('request_id'));
+  bru.setVar('request_id', (currentId + 1).toString());
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Test the tool with a different path (root directory)
+}

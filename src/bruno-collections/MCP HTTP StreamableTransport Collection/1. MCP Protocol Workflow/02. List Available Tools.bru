@@ -1,0 +1,72 @@
+meta {
+  name: 02. List Available Tools
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_endpoint}}/mcp
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json, text/event-stream
+  Mcp-Session-Id: {{session_id}}
+}
+
+body:json {
+  {
+    "jsonrpc": "2.0",
+    "id": {{request_id}},
+    "method": "tools/list"
+  }
+}
+
+script:pre-request {
+  console.log('🔍 Discovering available tools...');
+  console.log('🆔 Using session ID: ' + bru.getVar('session_id'));
+  console.log('📝 Request ID: ' + bru.getVar('request_id'));
+}
+
+script:post-response {
+  // Validate JSON-RPC response
+  test('Response is valid JSON-RPC', function () {
+      const jsonData = res.getBody();
+      expect(jsonData).to.have.property('jsonrpc', '2.0');
+      expect(jsonData).to.have.property('id');
+      expect(jsonData).to.have.property('result');
+  });
+  
+  // Validate tools list structure
+  test('Tools list is returned', function () {
+      const jsonData = res.getBody();
+      expect(jsonData.result).to.have.property('tools');
+      expect(jsonData.result.tools).to.be.an('array');
+      expect(jsonData.result.tools).to.have.lengthOf.above(0);
+  });
+  
+  // Validate list_directory tool is available
+  test('list_directory tool is available', function () {
+      const jsonData = res.getBody();
+      const tools = jsonData.result.tools;
+      const listDirTool = tools.find(tool => tool.name === 'list_directory');
+      expect(listDirTool).to.not.be.undefined;
+      expect(listDirTool).to.have.property('description');
+      expect(listDirTool).to.have.property('inputSchema');
+      console.log('✅ Found list_directory tool:', JSON.stringify(listDirTool, null, 2));
+  });
+  
+  // Increment request ID for next request
+  const currentId = parseInt(bru.getVar('request_id'));
+  bru.setVar('request_id', (currentId + 1).toString());
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Discover all available tools provided by the MCP server
+}

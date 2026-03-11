@@ -1,0 +1,33 @@
+meta {
+  name: 02. Test Directory List - Custom Path
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_endpoint}}/directory/list?path={{test_path}}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  path: {{test_path}}
+}
+
+script:post-response {
+  // Validate custom path response
+  test('Custom path directory listing works', function () {
+      expect(JSON.stringify(res.getBody())).to.be.a('string');
+      expect(JSON.stringify(res.getBody())).to.have.lengthOf.above(0);
+  });
+  
+  console.log('📁 Custom path listing preview:', JSON.stringify(res.getBody()).substring(0, 200) + '...');
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  Test directory listing with custom path parameter
+}
