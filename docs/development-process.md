@@ -1,8 +1,6 @@
 # Development Process
 
-*Migrated from `DEVELOPMENT_PROCESS.md` — Author: lemys Lopez (lemyskaman@gmail.com) — September 2025*
-
-This document chronicles the development journey of migrating the MCP server from local stdio transport to remote StreamableHTTP transport.
+This document chronicles the journey from a simple local stdio MCP server to a distributed StreamableHTTP deployment — the challenges encountered, the decisions made, and the production architecture that emerged.
 
 ---
 

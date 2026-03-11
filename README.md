@@ -1,16 +1,43 @@
 # Simple MCP Server
 
-An educational NestJS + TypeScript server demonstrating the **Model Context Protocol (MCP)** — how Large Language Models call external tools. Implements both **stdio** (local) and **StreamableHTTP** (remote/production) transports using Ollama + MCPHost + Llama 3.2:1b.
+An educational NestJS + TypeScript project teaching how to build a **distributed, production-grade MCP server** — where the AI client and the tool server run as independent processes over a network. Implements both **stdio** (local) and **StreamableHTTP** (remote/production) transports using Ollama + MCPHost + Llama 3.2:1b.
 
 Extended documentation lives in the [`docs/`](docs/) folder.
 
 ---
 
-## What This Project Demonstrates
+## What This Project Teaches
 
-The Simple MCP Server exposes a `list_directory` tool that allows an LLM (Llama 3.2:1b running locally via Ollama) to browse the filesystem on your behalf. The project covers the full development journey: starting with a local stdio server, migrating to a remote HTTP transport, and working through real integration challenges (session management, CORS, schema validation). Every architectural decision is documented.
+The core lesson is **distributed MCP architecture**: using the StreamableHTTP transport, the MCP server and the AI client (MCPHost + Ollama) are completely decoupled processes. The server can run on a different machine, inside a Docker container, or behind a load balancer — the client connects to it over HTTP just like any other remote API. This is the foundation of production MCP deployments.
 
-This is a teaching resource — not a production system. It is designed for developers learning MCP, educators demonstrating AI tool integration, and engineers evaluating NestJS for MCP server implementation.
+The project walks through the full journey: starting with a simple local stdio server (client and server in the same process), then migrating to the HTTP transport and solving the real distributed-systems challenges that come with it — session management across requests, CORS, host header validation, and schema-driven tool contracts. Every decision is documented with the reasoning behind it.
+
+The tool exposed (`list_directory`) is intentionally simple so the focus stays on the protocol and architecture, not the business logic. The same patterns apply to any tool you build on top.
+
+---
+
+## What This Project Does
+
+This server gives a local Ollama model the ability to **browse the filesystem** of the machine where the MCP server is running. When you ask a question that requires knowing what files exist somewhere, the model calls the server's tool, gets the directory listing back, and uses it to answer you — all transparently.
+
+### Available Tools
+
+| Tool | What it does | Input |
+|------|-------------|-------|
+| `list_directory` | Runs `ls` on the server's filesystem and returns the directory contents as text | `path` — the directory path to list |
+
+### Example Interaction
+
+```
+You:       What's inside my projects folder?
+Ollama:    [calls list_directory with path="/home/youruser/projects"]
+Server:    simple-mcp/  other-project/  notes.txt
+Ollama:    Your projects folder contains: simple-mcp, other-project, and notes.txt.
+```
+
+The key point: the model **never sees the filesystem directly** — it only sees what the tool returns. The server controls what is exposed and how. This is the MCP security boundary in action.
+
+> New tools (read file, write file, search, run commands, etc.) can be added by registering them in `src/mcp/mcp.service.ts`. See [docs/architecture.md](docs/architecture.md) for how tool registration works.
 
 ---
 
