@@ -8,10 +8,24 @@ This document chronicles the development journey of migrating the MCP server fro
 
 ## Table of Contents
 
-1. [Development Challenges & Solutions](#development-challenges--solutions)
-2. [MCPHost Integration Strategy](#mcphost-integration-strategy)
-3. [Production Deployment Architecture](#production-deployment-architecture)
-4. [Future Considerations](#future-considerations)
+1. [Development Timeline](#development-timeline)
+2. [Development Challenges & Solutions](#development-challenges--solutions)
+3. [MCPHost Integration Strategy](#mcphost-integration-strategy)
+4. [Production Deployment Architecture](#production-deployment-architecture)
+5. [Future Considerations](#future-considerations)
+
+---
+
+## Development Timeline
+
+The project was built over 8 days in September 2025 across 5 branches by a single author.
+
+| Phase | Branch | Period | Summary |
+|-------|--------|--------|---------|
+| Foundation | `feature/stedio-transport` | Sep 9 | Initial NestJS scaffold, stdio MCP server working with MCPHost and Llama 3.2:1b, Windows/Linux automation scripts added |
+| StreamableHTTP | `feature/http-streamable-transport` | Sep 11 | Migrated to HTTP transport, session management, full educational documentation written |
+| Testing Infrastructure | `feature/postman-collection` | Sep 15 | Postman and Bruno API collections added for testing the full MCP HTTP workflow |
+| Documentation | `docs/improoving` | Sep 17+ | Documentation reorganized into focused `docs/` files, root README simplified |
 
 ---
 

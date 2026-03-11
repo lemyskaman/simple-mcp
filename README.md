@@ -2,7 +2,7 @@
 
 An educational NestJS + TypeScript server demonstrating the **Model Context Protocol (MCP)** — how Large Language Models call external tools. Implements both **stdio** (local) and **StreamableHTTP** (remote/production) transports using Ollama + MCPHost + Llama 3.2:1b.
 
-Extended documentation lives in [`docs/`](docs/README.md).
+Extended documentation lives in the [`docs/`](docs/) folder.
 
 ---
 
@@ -81,7 +81,6 @@ mcphost --config .mcphost-http.yml
 | [MCP Protocol Guide](docs/mcp-protocol-guide.md) | Transports, request flow, JSON-RPC examples |
 | [Design Decisions](docs/design-decisions.md) | ADRs: NestJS, StreamableHTTP, Llama 3.2:1b, MCPHost, Git Bash |
 | [Development Process](docs/development-process.md) | Challenges solved, production AWS architecture |
-| [Git History](docs/git-history.md) | Commit timeline and development phases |
 | [Dependencies and Setup](docs/dependencies-and-setup.md) | All dependencies with versions; Windows/Linux/macOS setup |
 | [Configuration Reference](docs/configuration-reference.md) | Annotated config files and environment variables |
 | [Testing Guide](docs/testing-guide.md) | Quick start, curl/Bruno/Postman testing, debugging, FAQ |

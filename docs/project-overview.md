@@ -97,7 +97,7 @@ The system has three layers: the **MCPHost client** (manages the LLM and user in
 | [MCP Protocol Guide](mcp-protocol-guide.md) | Protocol concepts, transports, request flow, JSON-RPC examples |
 | [Design Decisions](design-decisions.md) | ADRs for framework, transport, model, and tool choices |
 | [Development Process](development-process.md) | Challenges solved, production AWS architecture, future roadmap |
-| [Git History](git-history.md) | Project timeline and commit-by-commit milestones |
+
 | [Dependencies and Setup](dependencies-and-setup.md) | All dependencies, cross-platform installation instructions |
 | [Configuration Reference](configuration-reference.md) | Annotated config files and environment variables |
 | [Testing Guide](testing-guide.md) | Quick start, stdio/HTTP testing, Bruno/Postman, debugging, FAQ |
